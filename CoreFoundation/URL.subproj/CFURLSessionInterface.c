@@ -660,11 +660,14 @@ void CFURLSessionSListFreeAll(CFURLSessionSList *_Nullable list) {
 
 bool CFURLSessionCurlHostIsEqual(const char *_Nonnull url, const char *_Nonnull expectedHost) {
 #if LIBCURL_VERSION_MAJOR > 7 || (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR >= 62)
+    printf("jflat: libcurl >= 7.62");
     bool isEqual = false;
     CURLU *h = curl_url();
     if (0 == curl_url_set(h, CURLUPART_URL, url, 0)) {
+        printf("jflat: curl_url_set success");
         char *curlHost = NULL;
         if (0 == curl_url_get(h, CURLUPART_HOST, &curlHost, 0)) {
+            printf("jflat: curl_url_get success, curlHost: %s, expectedHost: %s", curlHost, expectedHost);
             isEqual = (strlen(curlHost) == strlen(expectedHost) &&
                        strncmp(curlHost, expectedHost, strlen(curlHost)) == 0);
             curl_free(curlHost);
@@ -673,6 +676,7 @@ bool CFURLSessionCurlHostIsEqual(const char *_Nonnull url, const char *_Nonnull 
     }
     return isEqual;
 #else
+    printf("jflat: libcurl < 7.62");
     return true;
 #endif
 }

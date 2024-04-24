@@ -2024,7 +2024,28 @@ class TestURLSession: LoopbackServerTest {
         XCTAssertEqual(task.closeReason, nil)
     }
 #endif
-  
+
+    func test_urlHostDisagreement() throws {
+        print("jflat: test_urlHostDisagreement")
+        let urlString = "http://127.0.0.1&@127.2.2.2/"
+        let url = try XCTUnwrap(URL(string: urlString))
+        var urlRequest = URLRequest(url: url)
+        let expect = expectation(description: "Check error code is .badURL")
+        let delegate = SessionDelegate()
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+        let task = session.dataTask(with: urlRequest) { _, _, error in
+            XCTAssertNotNil(error as? URLError)
+            if let urlError = error as? URLError {
+                print("jflat: error code: \(urlError.code)")
+                XCTAssertEqual(urlError.code, .badURL)
+            }
+            expect.fulfill()
+        }
+        task.resume()
+        waitForExpectations(timeout: 5)
+        session.invalidateAndCancel()
+    }
+
     static var allTests: [(String, (TestURLSession) -> () throws -> Void)] {
         var retVal = [
             ("test_dataTaskWithURL", test_dataTaskWithURL),
@@ -2088,6 +2109,7 @@ class TestURLSession: LoopbackServerTest {
             ("test_checkErrorTypeAfterInvalidateAndCancel", test_checkErrorTypeAfterInvalidateAndCancel),
             ("test_taskCountAfterInvalidateAndCancel", test_taskCountAfterInvalidateAndCancel),
             ("test_sessionDelegateAfterInvalidateAndCancel", test_sessionDelegateAfterInvalidateAndCancel),
+            ("test_urlHostDisagreement", test_urlHostDisagreement),
             /* ⚠️ */ ("test_getAllTasks", testExpectedToFail(test_getAllTasks, "This test causes later ones to crash")),
             /* ⚠️ */ ("test_getTasksWithCompletion", testExpectedToFail(test_getTasksWithCompletion, "Flaky tests")),
             /* ⚠️ */ ("test_invalidResumeDataForDownloadTask",
