@@ -662,7 +662,7 @@ void CFURLSessionSListFreeAll(CFURLSessionSList *_Nullable list) {
 }
 
 bool CFURLSessionCurlHostIsEqual(const char *_Nonnull url, const char *_Nonnull expectedHost) {
-#if LIBCURL_VERSION_MAJOR > 7 || (LIBCURL_VERSION_MAJOR == 7 && LIBCURL_VERSION_MINOR >= 62)
+#if !NS_CURL_MISSING_URL_API
     bool isEqual = false;
     CURLU *h = curl_url();
     if (0 == curl_url_set(h, CURLUPART_URL, url, 0)) {
